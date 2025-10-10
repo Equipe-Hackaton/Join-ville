@@ -1,6 +1,6 @@
 <template>
   <div class="event-details-sympla">
-    <!-- Hero Section com imagem de fundo -->
+    <!-- Hero Section -->
     <div class="hero-section" :style="{ backgroundImage: `url(${event?.image})` }">
       <div class="hero-overlay">
         <div class="hero-container">
@@ -40,7 +40,7 @@
                   :class="{ 'is-favorite': isFavorite(event?.id) }"
                   @click="toggleFavorite(event?.id)"
                 >
-                  <font-awesome-icon :icon="isFavorite(event?.id) ? 'fa-solid fa-heart' : 'fa-regular fa-heart'" />
+                  <font-awesome-icon :icon="isFavorite(event?.id) ? 'heart' : ['far', 'heart']" />
                   {{ isFavorite(event?.id) ? 'Favoritado' : 'Favoritar' }}
                 </button>
 
@@ -77,7 +77,6 @@
                 <strong>{{ event?.location }}</strong><br>
                 Joinville - SC, Brasil
               </p>
-              <!-- Placeholder para mapa -->
               <div class="map-placeholder">
                 <font-awesome-icon icon="map-marked-alt" size="3x" />
                 <p>Mapa da localização</p>
@@ -131,84 +130,86 @@
 
         <!-- Sidebar -->
         <aside class="sidebar-column">
-          <!-- Card de Informações -->
-          <div class="info-card sticky-card">
-            <h3>Informações do Evento</h3>
+          <div class="sidebar-sticky">
+            <!-- Card de Informações -->
+            <div class="info-card">
+              <h3>Informações do Evento</h3>
 
-            <div class="info-list">
-              <div class="info-row">
-                <span class="info-label">
-                  <font-awesome-icon icon="calendar-days" />
-                  Data
-                </span>
-                <span class="info-value">{{ formatEventDate(event?.date) }}</span>
-              </div>
-
-              <div class="info-row">
-                <span class="info-label">
-                  <font-awesome-icon icon="clock" />
-                  Horário
-                </span>
-                <span class="info-value">
-                  {{ event?.horario_inicio || '19:00' }}
-                  <span v-if="event?.horario_fim">até {{ event.horario_fim }}</span>
-                </span>
-              </div>
-
-              <div class="info-row">
-                <span class="info-label">
-                  <font-awesome-icon icon="ticket" />
-                  Tipo
-                </span>
-                <span class="info-value">
-                  <span class="event-type-badge" :class="event?.ativo ? 'active' : 'inactive'">
-                    {{ event?.ativo ? 'Evento Ativo' : 'Evento Encerrado' }}
+              <div class="info-list">
+                <div class="info-row">
+                  <span class="info-label">
+                    <font-awesome-icon icon="calendar-days" />
+                    Data
                   </span>
-                </span>
+                  <span class="info-value">{{ formatEventDate(event?.date) }}</span>
+                </div>
+
+                <div class="info-row">
+                  <span class="info-label">
+                    <font-awesome-icon icon="clock" />
+                    Horário
+                  </span>
+                  <span class="info-value">
+                    {{ event?.horario_inicio || '19:00' }}
+                    <span v-if="event?.horario_fim">até {{ event.horario_fim }}</span>
+                  </span>
+                </div>
+
+                <div class="info-row">
+                  <span class="info-label">
+                    <font-awesome-icon icon="ticket" />
+                    Tipo
+                  </span>
+                  <span class="info-value">
+                    <span class="event-type-badge" :class="event?.ativo ? 'active' : 'inactive'">
+                      {{ event?.ativo ? 'Evento Ativo' : 'Evento Encerrado' }}
+                    </span>
+                  </span>
+                </div>
+
+                <div class="info-row">
+                  <span class="info-label">
+                    <font-awesome-icon icon="tags" />
+                    Categoria
+                  </span>
+                  <span class="info-value">{{ event?.category }}</span>
+                </div>
               </div>
 
-              <div class="info-row">
-                <span class="info-label">
-                  <font-awesome-icon icon="tags" />
-                  Categoria
-                </span>
-                <span class="info-value">{{ event?.category }}</span>
+              <div class="card-cta">
+                <button
+                  v-if="authStore.userType !== 'EMPRESA'"
+                  class="btn-primary-large"
+                  @click="handleInterest"
+                >
+                  <font-awesome-icon icon="check-circle" />
+                  Tenho Interesse
+                </button>
+
+                <p class="cta-note">
+                  <font-awesome-icon icon="info-circle" />
+                  Informações sobre a venda de ingressos serão enviadas pela empresa organizadora.
+                </p>
               </div>
             </div>
 
-            <div class="card-cta">
-              <button
-                v-if="authStore.userType !== 'EMPRESA'"
-                class="btn-primary-large"
-                @click="handleInterest"
-              >
-                <font-awesome-icon icon="check-circle" />
-                Tenho Interesse
-              </button>
-
-              <p class="cta-note">
-                <font-awesome-icon icon="info-circle" />
-                Informações sobre a venda de ingressos serão enviadas pela empresa organizadora.
-              </p>
-            </div>
-          </div>
-
-          <!-- Card de Compartilhamento -->
-          <div class="share-card">
-            <h4>Compartilhe este evento</h4>
-            <div class="social-share">
-              <button class="share-btn whatsapp" @click="shareWhatsApp">
-                <font-awesome-icon :icon="['fab', 'whatsapp']" />
-              </button>
-              <button class="share-btn facebook" @click="shareFacebook">
-                <font-awesome-icon :icon="['fab', 'facebook']" />
-              </button>
-              <button class="share-btn twitter" @click="shareTwitter">
-                <font-awesome-icon :icon="['fab', 'twitter']" />
-              </button>
-              <button class="share-btn link" @click="copyLink">
-                <font-awesome-icon icon="link" />
-              </button>
+            <!-- Card de Compartilhamento -->
+            <div class="share-card">
+              <h4>Compartilhe este evento</h4>
+              <div class="social-share">
+                <button class="share-btn whatsapp" @click="shareWhatsApp" title="WhatsApp">
+                  <font-awesome-icon :icon="['fab', 'whatsapp']" />
+                </button>
+                <button class="share-btn facebook" @click="shareFacebook" title="Facebook">
+                  <font-awesome-icon :icon="['fab', 'facebook']" />
+                </button>
+                <button class="share-btn twitter" @click="shareTwitter" title="Twitter">
+                  <font-awesome-icon :icon="['fab', 'twitter']" />
+                </button>
+                <button class="share-btn link" @click="copyLink" title="Copiar link">
+                  <font-awesome-icon icon="link" />
+                </button>
+              </div>
             </div>
           </div>
         </aside>
@@ -224,6 +225,7 @@
 </template>
 
 <script setup>
+// [O script permanece o mesmo que você já tem]
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
@@ -378,6 +380,18 @@ const handleInterest = async () => {
   }
 }
 
+const shareEvent = () => {
+  if (navigator.share) {
+    navigator.share({
+      title: event.value.title,
+      text: `Confira: ${event.value.title}`,
+      url: window.location.href
+    })
+  } else {
+    copyLink()
+  }
+}
+
 const shareWhatsApp = () => {
   const text = `Confira este evento: ${event.value.title} - ${window.location.href}`
   window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
@@ -400,15 +414,12 @@ const copyLink = () => {
 const formatEventDate = (dateStr) => {
   if (!dateStr) return 'Data a definir'
 
-  // Se já estiver formatado (ex: "15 a 20 DEZ")
   if (dateStr.match(/\d{1,2}\s+[A-Z]{3}/)) {
     const meses = {
       'JAN': 'Janeiro', 'FEV': 'Fevereiro', 'MAR': 'Março',
-      'ABR': 'Abril', 'MAI': 'Maio', 'JUN': 'Junho',
-      'JUL': 'Julho', 'AGO': 'Agosto', 'SET': 'Setembro',
+      'ABR': 'Abril', 'MAI': 'Maio','JUN': 'Junho', 'JUL': 'Julho', 'AGO': 'Agosto', 'SET': 'Setembro',
       'OUT': 'Outubro', 'NOV': 'Novembro', 'DEZ': 'Dezembro'
     }
-
     return dateStr.replace(/([A-Z]{3})/g, (match) => meses[match] || match)
   }
 
@@ -429,10 +440,10 @@ const goBack = () => router.go(-1)
   background: #f8f9fa;
 }
 
-/* Hero Section */
+/* Hero Section - CORRIGIDO */
 .hero-section {
   position: relative;
-  min-height: 450px;
+  min-height: 500px;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -451,7 +462,7 @@ const goBack = () => router.go(-1)
   position: relative;
   z-index: 2;
   height: 100%;
-  min-height: 450px;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
 }
@@ -470,6 +481,7 @@ const goBack = () => router.go(-1)
   gap: 0.5rem;
   align-self: flex-start;
   transition: all 0.3s;
+  margin-bottom: 2rem;
 }
 
 .back-btn:hover {
@@ -481,12 +493,16 @@ const goBack = () => router.go(-1)
   display: grid;
   grid-template-columns: 1fr 400px;
   gap: 3rem;
-  align-items: start;
-  margin-top: 2rem;
+  align-items: end; /* <<-- MUDE de 'start' para 'end' */
+  flex: 1;
+  padding-bottom: 6rem; /* <<-- ADICIONE esta linha (96px) */
 }
 
 .hero-info {
   color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .event-category {
@@ -498,10 +514,11 @@ const goBack = () => router.go(-1)
   font-size: 0.9rem;
   font-weight: 500;
   margin-bottom: 1rem;
+  width: fit-content;
 }
 
 .event-title {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 2rem 0;
   line-height: 1.2;
@@ -525,16 +542,18 @@ const goBack = () => router.go(-1)
   opacity: 0.8;
 }
 
+/* Hero Card - CORRIGIDO */
 .hero-card {
   background: white;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  height: fit-content;
 }
 
 .event-image-card {
   width: 100%;
-  height: 300px;
+  height: 250px;
   overflow: hidden;
 }
 
@@ -546,13 +565,13 @@ const goBack = () => router.go(-1)
 
 .card-actions {
   padding: 1.5rem;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
 .btn-favorite,
 .btn-share {
-  flex: 1;
   padding: 1rem;
   border: 2px solid #e0e0e0;
   background: white;
@@ -564,6 +583,7 @@ const goBack = () => router.go(-1)
   justify-content: center;
   gap: 0.5rem;
   transition: all 0.3s;
+  font-size: 0.9rem;
 }
 
 .btn-favorite:hover {
@@ -582,7 +602,7 @@ const goBack = () => router.go(-1)
   color: #0066cc;
 }
 
-/* Main Container */
+/* Main Container - CORRIGIDO */
 .main-container {
   max-width: 1200px;
   margin: -80px auto 0;
@@ -647,7 +667,7 @@ const goBack = () => router.go(-1)
   color: #999;
 }
 
-/* Organizer Section */
+/* Organizer Section - CORRIGIDO */
 .organizer-card {
   display: flex;
   gap: 1.5rem;
@@ -656,6 +676,7 @@ const goBack = () => router.go(-1)
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
+  align-items: start;
 }
 
 .organizer-card:hover {
@@ -686,6 +707,10 @@ const goBack = () => router.go(-1)
   color: #0066cc;
 }
 
+.organizer-info {
+  flex: 1;
+}
+
 .organizer-info h3 {
   margin: 0 0 0.5rem 0;
   color: #1a1a1a;
@@ -701,6 +726,7 @@ const goBack = () => router.go(-1)
 .organizer-actions {
   display: flex;
   gap: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .btn-follow,
@@ -744,14 +770,19 @@ const goBack = () => router.go(-1)
   border-color: #218838;
 }
 
-/* Sidebar */
+/* Sidebar - STICKY CORRIGIDO */
 .sidebar-column {
-  position: relative;
-  top: 100px;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
-  margin-top: 100px;
+}
+
+.sidebar-sticky {
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
 }
 
 .info-card,
@@ -778,7 +809,7 @@ const goBack = () => router.go(-1)
 .info-row {
   display: flex;
   justify-content: space-between;
-  align-items: start;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -789,6 +820,7 @@ const goBack = () => router.go(-1)
   color: #666;
   font-weight: 500;
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .info-label svg {
@@ -800,6 +832,7 @@ const goBack = () => router.go(-1)
   text-align: right;
   font-weight: 600;
   color: #1a1a1a;
+  font-size: 0.95rem;
 }
 
 .event-type-badge {
@@ -807,6 +840,7 @@ const goBack = () => router.go(-1)
   border-radius: 20px;
   font-size: 0.85rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .event-type-badge.active {
@@ -856,6 +890,7 @@ const goBack = () => router.go(-1)
   justify-content: center;
   gap: 0.5rem;
   margin: 0;
+  line-height: 1.4;
 }
 
 /* Share Card */
@@ -920,10 +955,11 @@ const goBack = () => router.go(-1)
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive */
+/* Responsive - MELHORADO */
 @media (max-width: 1024px) {
   .hero-content {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
 
   .hero-card {
@@ -935,14 +971,23 @@ const goBack = () => router.go(-1)
     grid-template-columns: 1fr;
   }
 
-  .sidebar-column {
+  .sidebar-sticky {
     position: static;
   }
 }
 
 @media (max-width: 768px) {
+  .hero-container {
+    padding: 1.5rem;
+    min-height: 400px;
+  }
+
   .event-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
+  }
+
+  .hero-content {
+    gap: 1.5rem;
   }
 
   .main-container {
@@ -959,14 +1004,49 @@ const goBack = () => router.go(-1)
   .organizer-card {
     flex-direction: column;
     text-align: center;
-  }
-
-  .organizer-avatar {
-    margin: 0 auto;
+    align-items: center;
   }
 
   .organizer-actions {
     justify-content: center;
+    width: 100%;
+  }
+
+  .btn-follow,
+  .btn-chat {
+    flex: 1;
+  }
+
+  .card-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .info-value {
+    text-align: left;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-title {
+    font-size: 1.5rem;
+  }
+
+  .info-item {
+    font-size: 1rem;
+  }
+
+  .event-quick-info {
+    gap: 0.75rem;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
   }
 }
 </style>
