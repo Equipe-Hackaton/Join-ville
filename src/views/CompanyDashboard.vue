@@ -107,7 +107,7 @@
           <div class="dashboard-card recent-events">
             <div class="card-header">
               <h3>Eventos Recentes</h3>
-              <router-link to="/criar-evento" class="btn-link">
+              <router-link to="/create-event" class="btn-link">
                 <font-awesome-icon icon="plus" /> Novo Evento
               </router-link>
             </div>

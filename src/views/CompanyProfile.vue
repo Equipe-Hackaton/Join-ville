@@ -73,6 +73,9 @@
           >
             🎉 Meus Eventos
           </button>
+          <router-link to="/company-dashboard" class="tab-btn">
+            📊 Dashboard
+          </router-link>
         </div>
 
         <!-- Aba Perfil -->
