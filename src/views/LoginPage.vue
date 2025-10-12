@@ -157,11 +157,9 @@
 import { ref, reactive } from 'vue';
 import { useRouter } from 'vue-router';
 import api from '@/services/api';
-// --- PASSO 1: Importar a store de autenticação ---
 import { useAuthStore } from '@/stores/auth';
-
 const router = useRouter();
-// --- PASSO 2: Instanciar a store ---
+
 const authStore = useAuthStore();
 
 const isLogin = ref(true);
@@ -186,7 +184,7 @@ const closeModal = () => {
   // Redireciona para a página de perfil correta após o login
   if (authStore.isAuthenticated) {
     if (authStore.userType === 'EMPRESA') {
-      router.push('/company-profile');
+      router.push('/company-dashboard');
     } else {
       router.push('/user-profile');
     }
@@ -256,10 +254,6 @@ const handleLogin = async () => {
       email: formData.email,
       password: formData.password,
     });
-
-    // --- PASSO 3: Centralizar a lógica na store ---
-    // Em vez de manipular o localStorage aqui, chamamos a action da store.
-    // A store será responsável por salvar o estado e o localStorage.
     authStore.setAuthData(response);
 
     showMessage('Login realizado com sucesso!', 'success');
@@ -272,8 +266,6 @@ const handleLogin = async () => {
     showMessage(errorMessage, 'error');
   }
 };
-
-// A função de registro continua a mesma, está ótima!
 const handleRegister = async () => {
   if (userType.value === 'user') {
     const userData = {

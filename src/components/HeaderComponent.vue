@@ -69,9 +69,13 @@
       <p v-if="authStore.user?.email">{{ authStore.user.email }}</p>
     </div>
     <nav class="sidebar-links">
-      <a @click="goToProfile" class="sidebar-link">
+      <a v-if="userType === 'USUARIO'" @click="goToProfile" class="sidebar-link">
         <font-awesome-icon icon="fa-solid fa-cog" />
         <span>Configurações do Perfil</span>
+      </a>
+      <a v-if="userType === 'EMPRESA'" @click="goToCompanyDashboard" class="sidebar-link">
+        <font-awesome-icon icon="fa-solid fa-cog" />
+        <span>Dashboard da Empresa</span>
       </a>
       <a v-if="userType === 'EMPRESA'" @click="goToCreateEvent" class="sidebar-link">
         <font-awesome-icon icon="fa-solid fa-plus" />
@@ -197,6 +201,10 @@ const goToProfile = () => {
 
 const goToCreateEvent = () => {
   router.push({ name: 'CreateEvent' })
+  closeAllOverlays()
+}
+const goToCompanyDashboard = () => {
+  router.push({ name: 'CompanyDashboard' })
   closeAllOverlays()
 }
 

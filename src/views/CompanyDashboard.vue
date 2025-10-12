@@ -935,11 +935,6 @@ const formatTimeAgo = (dateStr) => {
   gap: 0.5rem;
   font-size: 0.9rem;
 }
-
-.btn-link:hover {
-  text-decoration: underline;
-}
-
 /* Events List Compact */
 .events-list-compact {
   display: flex;
