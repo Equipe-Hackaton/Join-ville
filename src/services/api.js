@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: 'https://join-villeapi.fabricadesoftware.ifc.edu.br/api/',
+  baseURL: 'http://localhost:8000/api', // Altere para a URL da sua API
 });
 
 apiClient.interceptors.request.use(

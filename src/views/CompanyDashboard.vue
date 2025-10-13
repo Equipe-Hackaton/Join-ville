@@ -162,7 +162,7 @@
             />
           </div>
 
-          <router-link to="/criar-evento" class="btn-primary">
+          <router-link to="/create-event" class="btn-primary">
             <font-awesome-icon icon="plus" />
             Criar Novo Evento
           </router-link>
@@ -544,9 +544,7 @@ const selectChat = (chatId) => {
 
 const sendMessage = () => {
   if (!newMessage.value.trim()) return
-
-  // Aqui você implementaria o envio real
-  toast.success('Mensagem enviada!')
+  // implementar envio real via API
   newMessage.value = ''
 }
 

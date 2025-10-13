@@ -1,7 +1,6 @@
 // src/stores/chat.js
 import { defineStore } from 'pinia';
 import api from '@/services/api';
-import { useAuthStore } from './auth'; // Assumindo que você tenha uma authStore. Se não, adaptaremos.
 
 export const useChatStore = defineStore('chat', {
   state: () => ({

@@ -1,83 +1,59 @@
 <template>
-  <div class="event-details-sympla">
-    <!-- Hero Section -->
-    <div class="hero-section" :style="{ backgroundImage: `url(${event?.image})` }">
-      <div class="hero-overlay">
-        <div class="hero-container">
-          <button @click="goBack" class="back-btn">
-            <font-awesome-icon icon="arrow-left" /> Voltar
-          </button>
+  <div class="event-details">
+    <!-- Header com imagem -->
+    <div class="event-header">
+      <button @click="goBack" class="back-button">
+        <font-awesome-icon icon="arrow-left" /> Voltar
+      </button>
 
-          <div class="hero-content">
-            <div class="hero-info">
-              <span class="event-category">{{ event?.category }}</span>
-              <h1 class="event-title">{{ event?.title }}</h1>
-
-              <div class="event-quick-info">
-                <div class="info-item">
-                  <font-awesome-icon icon="calendar-days" />
-                  <span>{{ formatEventDate(event?.date) }}</span>
-                </div>
-                <div class="info-item">
-                  <font-awesome-icon icon="clock" />
-                  <span>{{ event?.horario_inicio || '19:00' }}</span>
-                </div>
-                <div class="info-item">
-                  <font-awesome-icon icon="location-dot" />
-                  <span>{{ event?.location }}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="hero-card">
-              <div class="event-image-card">
-                <img :src="event?.image" :alt="event?.title" />
-              </div>
-
-              <div class="card-actions">
-                <button
-                  class="btn-favorite"
-                  :class="{ 'is-favorite': isFavorite(event?.id) }"
-                  @click="toggleFavorite(event?.id)"
-                >
-                  <font-awesome-icon :icon="isFavorite(event?.id) ? 'heart' : ['far', 'heart']" />
-                  {{ isFavorite(event?.id) ? 'Favoritado' : 'Favoritar' }}
-                </button>
-
-                <button class="btn-share" @click="shareEvent">
-                  <font-awesome-icon icon="share-nodes" />
-                  Compartilhar
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="event-banner">
+        <img :src="event?.image" :alt="event?.title" />
+        <div class="banner-overlay"></div>
       </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="main-container">
-      <div class="content-grid">
-        <!-- Coluna Principal -->
-        <div class="main-column">
+    <!-- Container Principal -->
+    <div class="event-container">
+      <div class="event-layout">
+
+        <!-- Coluna Esquerda: Informações -->
+        <div class="event-main">
+          <!-- Título e Categoria -->
+          <div class="event-intro">
+            <span class="event-badge">{{ event?.category }}</span>
+            <h1 class="event-name">{{ event?.title }}</h1>
+
+            <div class="event-meta">
+              <div class="meta-item">
+                <font-awesome-icon icon="calendar-days" class="meta-icon" />
+                <span>{{ formatEventDate(event?.date) }}</span>
+              </div>
+              <div class="meta-item">
+                <font-awesome-icon icon="clock" class="meta-icon" />
+                <span>{{ event?.horario_inicio || '19:00' }}</span>
+              </div>
+              <div class="meta-item">
+                <font-awesome-icon icon="location-dot" class="meta-icon" />
+                <span>{{ event?.location }}</span>
+              </div>
+            </div>
+          </div>
+
           <!-- Sobre o Evento -->
-          <section class="content-section">
-            <h2 class="section-title">Sobre o evento</h2>
-            <div class="event-description" v-html="formatDescription(event?.description)"></div>
+          <section class="event-section">
+            <h2 class="section-heading">Sobre o evento</h2>
+            <div class="section-content" v-html="formatDescription(event?.description)"></div>
           </section>
 
           <!-- Localização -->
-          <section class="content-section">
-            <h2 class="section-title">
-              <font-awesome-icon icon="location-dot" />
-              Localização
+          <section class="event-section">
+            <h2 class="section-heading">
+              <font-awesome-icon icon="location-dot" /> Localização
             </h2>
-            <div class="location-info">
-              <p class="location-address">
-                <strong>{{ event?.location }}</strong><br>
-                Joinville - SC, Brasil
-              </p>
-              <div class="map-placeholder">
+            <div class="section-content">
+              <p class="location-name">{{ event?.location }}</p>
+              <p class="location-address">Joinville - SC, Brasil</p>
+              <div class="map-container">
                 <font-awesome-icon icon="map-marked-alt" size="3x" />
                 <p>Mapa da localização</p>
               </div>
@@ -85,139 +61,148 @@
           </section>
 
           <!-- Organizador -->
-          <section class="content-section organizer-section">
-            <h2 class="section-title">
-              <font-awesome-icon icon="building" />
-              Organizador
+          <section class="event-section">
+            <h2 class="section-heading">
+              <font-awesome-icon icon="building" /> Organizador
             </h2>
-            <div class="organizer-card" @click="goToCompanyProfile">
-              <div class="organizer-avatar">
-                <img
-                  v-if="event?.empresa?.avatar"
-                  :src="event.empresa.avatar"
-                  :alt="event.empresa.nome_empresa"
-                />
-                <font-awesome-icon v-else icon="building" />
-              </div>
-              <div class="organizer-info">
-                <h3>{{ event?.empresa?.nome_empresa || 'Empresa Organizadora' }}</h3>
-                <p>{{ event?.empresa?.descricao || 'Organizador de eventos em Joinville' }}</p>
-
-                <div class="organizer-actions">
-                  <button
-                    v-if="authStore.isAuthenticated && authStore.userType === 'USUARIO'"
-                    class="btn-follow"
-                    :class="{ 'is-following': isFollowing }"
-                    @click.stop="toggleFollow"
-                  >
-                    <font-awesome-icon :icon="isFollowing ? 'check' : 'plus'" />
-                    {{ isFollowing ? 'Seguindo' : 'Seguir' }}
-                  </button>
-
-                  <button
-                    v-if="authStore.isAuthenticated && authStore.userType === 'USUARIO'"
-                    class="btn-chat"
-                    @click.stop="startChat"
-                  >
-                    <font-awesome-icon icon="comment-dots" />
-                    Conversar
-                  </button>
+            <div class="organizer-box" @click="goToCompanyProfile">
+              <div class="organizer-left">
+                <div class="organizer-photo">
+                  <img
+                    v-if="event?.empresa?.avatar"
+                    :src="event.empresa.avatar"
+                    :alt="event.empresa.nome_empresa"
+                  />
+                  <font-awesome-icon v-else icon="building" />
                 </div>
+                <div class="organizer-details">
+                  <h3 class="organizer-name">{{ event?.empresa?.nome_empresa || 'Empresa Organizadora' }}</h3>
+                  <p class="organizer-bio">{{ event?.empresa?.descricao || 'Organizador de eventos em Joinville' }}</p>
+                </div>
+              </div>
+
+              <div class="organizer-right" v-if="authStore.isAuthenticated && authStore.userType === 'USUARIO'">
+                <button class="btn-follow" :class="{ following: isFollowing }" @click.stop="toggleFollow">
+                  <font-awesome-icon :icon="isFollowing ? 'check' : 'plus'" />
+                  {{ isFollowing ? 'Seguindo' : 'Seguir' }}
+                </button>
+                <button class="btn-message" @click.stop="startChat">
+                  <font-awesome-icon icon="comment-dots" />
+                  Enviar mensagem
+                </button>
               </div>
             </div>
           </section>
         </div>
 
-        <!-- Sidebar -->
-        <aside class="sidebar-column">
-          <div class="sidebar-sticky">
-            <!-- Card de Informações -->
-            <div class="info-card">
-              <h3>Informações do Evento</h3>
-
-              <div class="info-list">
-                <div class="info-row">
-                  <span class="info-label">
-                    <font-awesome-icon icon="calendar-days" />
-                    Data
-                  </span>
-                  <span class="info-value">{{ formatEventDate(event?.date) }}</span>
-                </div>
-
-                <div class="info-row">
-                  <span class="info-label">
-                    <font-awesome-icon icon="clock" />
-                    Horário
-                  </span>
-                  <span class="info-value">
-                    {{ event?.horario_inicio || '19:00' }}
-                    <span v-if="event?.horario_fim">até {{ event.horario_fim }}</span>
-                  </span>
-                </div>
-
-                <div class="info-row">
-                  <span class="info-label">
-                    <font-awesome-icon icon="ticket" />
-                    Tipo
-                  </span>
-                  <span class="info-value">
-                    <span class="event-type-badge" :class="event?.ativo ? 'active' : 'inactive'">
-                      {{ event?.ativo ? 'Evento Ativo' : 'Evento Encerrado' }}
-                    </span>
-                  </span>
-                </div>
-
-                <div class="info-row">
-                  <span class="info-label">
-                    <font-awesome-icon icon="tags" />
-                    Categoria
-                  </span>
-                  <span class="info-value">{{ event?.category }}</span>
-                </div>
-              </div>
-
-              <div class="card-cta">
-                <button
-                  v-if="authStore.userType !== 'EMPRESA'"
-                  class="btn-primary-large"
-                  @click="handleInterest"
-                >
-                  <font-awesome-icon icon="check-circle" />
-                  Tenho Interesse
-                </button>
-
-                <p class="cta-note">
-                  <font-awesome-icon icon="info-circle" />
-                  Informações sobre a venda de ingressos serão enviadas pela empresa organizadora.
-                </p>
-              </div>
+        <!-- Coluna Direita: Card Fixo -->
+        <aside class="event-sidebar">
+          <div class="sidebar-card">
+            <!-- Preview da imagem -->
+            <div class="card-image">
+              <img :src="event?.image" :alt="event?.title" />
             </div>
 
-            <!-- Card de Compartilhamento -->
-            <div class="share-card">
-              <h4>Compartilhe este evento</h4>
-              <div class="social-share">
-                <button class="share-btn whatsapp" @click="shareWhatsApp" title="WhatsApp">
-                  <font-awesome-icon :icon="['fab', 'whatsapp']" />
+            <!-- Informações -->
+            <div class="card-body">
+              <div class="card-info-grid">
+                <div class="info-block">
+                  <font-awesome-icon icon="calendar-days" class="info-icon" />
+                  <div class="info-text">
+                    <span class="info-label">Data</span>
+                    <span class="info-value">{{ formatEventDate(event?.date) }}</span>
+                  </div>
+                </div>
+
+                <div class="info-block">
+                  <font-awesome-icon icon="clock" class="info-icon" />
+                  <div class="info-text">
+                    <span class="info-label">Horário</span>
+                    <span class="info-value">{{ event?.horario_inicio || '19:00' }}</span>
+                  </div>
+                </div>
+
+                <div class="info-block">
+                  <font-awesome-icon icon="location-dot" class="info-icon" />
+                  <div class="info-text">
+                    <span class="info-label">Local</span>
+                    <span class="info-value">{{ event?.location }}</span>
+                  </div>
+                </div>
+
+                <div class="info-block">
+                  <font-awesome-icon icon="tags" class="info-icon" />
+                  <div class="info-text">
+                    <span class="info-label">Categoria</span>
+                    <span class="info-value">{{ event?.category }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Status do Evento -->
+              <div class="event-status" :class="event?.ativo ? 'active' : 'inactive'">
+                <font-awesome-icon :icon="event?.ativo ? 'check-circle' : 'times-circle'" />
+                {{ event?.ativo ? 'Evento Ativo' : 'Evento Encerrado' }}
+              </div>
+
+              <!-- Botão de Interesse -->
+              <button
+                v-if="authStore.userType !== 'EMPRESA'"
+                class="btn-interest"
+                @click="handleInterest"
+              >
+                <font-awesome-icon icon="heart" />
+                Tenho Interesse
+              </button>
+
+              <!-- Ações -->
+              <div class="card-actions">
+                <button
+                  class="action-btn"
+                  :class="{ active: isFavorite(event?.id) }"
+                  @click="toggleFavorite(event?.id)"
+                >
+                  <font-awesome-icon :icon="isFavorite(event?.id) ? 'heart' : ['far', 'heart']" />
+                  Favoritar
                 </button>
-                <button class="share-btn facebook" @click="shareFacebook" title="Facebook">
-                  <font-awesome-icon :icon="['fab', 'facebook']" />
-                </button>
-                <button class="share-btn twitter" @click="shareTwitter" title="Twitter">
-                  <font-awesome-icon :icon="['fab', 'twitter']" />
-                </button>
-                <button class="share-btn link" @click="copyLink" title="Copiar link">
-                  <font-awesome-icon icon="link" />
+                <button class="action-btn" @click="shareEvent">
+                  <font-awesome-icon icon="share-nodes" />
+                  Compartilhar
                 </button>
               </div>
+
+              <!-- Nota -->
+              <p class="card-note">
+                <font-awesome-icon icon="info-circle" />
+                Informações sobre ingressos serão enviadas pela empresa organizadora.
+              </p>
+            </div>
+          </div>
+
+          <!-- Social Share -->
+          <div class="social-card">
+            <h4>Compartilhar evento</h4>
+            <div class="social-buttons">
+              <button class="social-btn whatsapp" @click="shareWhatsApp" title="WhatsApp">
+                <font-awesome-icon :icon="['fab', 'whatsapp']" />
+              </button>
+              <button class="social-btn facebook" @click="shareFacebook" title="Facebook">
+                <font-awesome-icon :icon="['fab', 'facebook']" />
+              </button>
+              <button class="social-btn twitter" @click="shareTwitter" title="Twitter">
+                <font-awesome-icon :icon="['fab', 'twitter']" />
+              </button>
+              <button class="social-btn link" @click="copyLink" title="Copiar link">
+                <font-awesome-icon icon="link" />
+              </button>
             </div>
           </div>
         </aside>
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-overlay">
+    <!-- Loading -->
+    <div v-if="loading" class="loading-screen">
       <div class="spinner"></div>
       <p>Carregando evento...</p>
     </div>
@@ -225,8 +210,7 @@
 </template>
 
 <script setup>
-// [O script permanece o mesmo que você já tem]
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
@@ -256,7 +240,6 @@ const loadEvent = async () => {
     loading.value = true
     const allEvents = await eventService.getAllEvents()
     event.value = allEvents.find(e => e.id === parseInt(route.params.id))
-
     if (!event.value) {
       toast.error('Evento não encontrado')
       router.push('/')
@@ -276,7 +259,6 @@ const loadFavorites = () => {
 
 const checkIfFollowing = () => {
   if (!authStore.isAuthenticated || !event.value?.empresa?.id) return
-
   const following = localStorage.getItem('followingCompanies')
   if (following) {
     const followingList = JSON.parse(following)
@@ -304,13 +286,10 @@ const toggleFollow = () => {
     router.push('/login')
     return
   }
-
   const following = localStorage.getItem('followingCompanies')
   let followingList = following ? JSON.parse(following) : []
-
   const companyId = event.value.empresa.id
   const index = followingList.indexOf(companyId)
-
   if (index > -1) {
     followingList.splice(index, 1)
     isFollowing.value = false
@@ -320,7 +299,6 @@ const toggleFollow = () => {
     isFollowing.value = true
     toast.success('Agora você está seguindo esta empresa')
   }
-
   localStorage.setItem('followingCompanies', JSON.stringify(followingList))
 }
 
@@ -330,19 +308,16 @@ const startChat = async () => {
     router.push('/login')
     return
   }
-
   if (authStore.userType !== 'USUARIO') {
     toast.error('Apenas usuários podem iniciar conversas')
     return
   }
-
   try {
     const empresaId = event.value.empresa?.id
     if (!empresaId) {
       toast.error('Empresa não encontrada')
       return
     }
-
     const room = await chatStore.startChatWith(empresaId)
     if (room && room.id) {
       router.push({ name: 'ChatRoom', params: { id: room.id } })
@@ -355,10 +330,7 @@ const startChat = async () => {
 
 const goToCompanyProfile = () => {
   if (!event.value?.empresa?.id) return
-  router.push({
-    name: 'PublicCompanyProfile',
-    params: { id: event.value.empresa.id }
-  })
+  router.push({ name: 'PublicCompanyProfile', params: { id: event.value.empresa.id } })
 }
 
 const handleInterest = async () => {
@@ -367,15 +339,12 @@ const handleInterest = async () => {
     router.push('/login')
     return
   }
-
   try {
     await api.showInterestInEvent(route.params.id)
     toast.success('Interesse registrado! A empresa pode entrar em contato.')
   } catch (error) {
     console.error('Erro ao registrar interesse:', error)
-    const errorMsg = error.response?.data?.message ||
-                     error.response?.data?.detail ||
-                     'Erro ao registrar interesse'
+    const errorMsg = error.response?.data?.message || error.response?.data?.detail || 'Erro ao registrar interesse'
     toast.info(errorMsg)
   }
 }
@@ -413,16 +382,15 @@ const copyLink = () => {
 
 const formatEventDate = (dateStr) => {
   if (!dateStr) return 'Data a definir'
-
   if (dateStr.match(/\d{1,2}\s+[A-Z]{3}/)) {
     const meses = {
       'JAN': 'Janeiro', 'FEV': 'Fevereiro', 'MAR': 'Março',
-      'ABR': 'Abril', 'MAI': 'Maio','JUN': 'Junho', 'JUL': 'Julho', 'AGO': 'Agosto', 'SET': 'Setembro',
+      'ABR': 'Abril', 'MAI': 'Maio', 'JUN': 'Junho',
+      'JUL': 'Julho', 'AGO': 'Agosto', 'SET': 'Setembro',
       'OUT': 'Outubro', 'NOV': 'Novembro', 'DEZ': 'Dezembro'
     }
     return dateStr.replace(/([A-Z]{3})/g, (match) => meses[match] || match)
   }
-
   return dateStr
 }
 
@@ -435,231 +403,173 @@ const goBack = () => router.go(-1)
 </script>
 
 <style scoped>
-.event-details-sympla {
+* {
+  box-sizing: border-box;
+}
+
+.event-details {
+  background: #f5f5f5;
   min-height: 100vh;
-  background: #f8f9fa;
+  padding-bottom: 4rem;
 }
 
-/* Hero Section - CORRIGIDO */
-.hero-section {
+/* ========== HEADER ========== */
+.event-header {
   position: relative;
-  min-height: 500px;
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: #fff;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.hero-overlay {
+.back-button {
   position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.9) 100%);
-}
-
-.hero-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  position: relative;
-  z-index: 2;
-  height: 100%;
-  min-height: 500px;
-  display: flex;
-  flex-direction: column;
-}
-
-.back-btn {
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.3);
-  color: white;
+  top: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid #e0e0e0;
   padding: 0.75rem 1.5rem;
   border-radius: 50px;
   cursor: pointer;
-  font-weight: 500;
-  display: inline-flex;
+  font-weight: 600;
+  color: #333;
+  display: flex;
   align-items: center;
   gap: 0.5rem;
-  align-self: flex-start;
   transition: all 0.3s;
-  margin-bottom: 2rem;
 }
 
-.back-btn:hover {
-  background: rgba(255,255,255,0.3);
-  transform: translateX(-4px);
-}
-
-.hero-content {
-  display: grid;
-  grid-template-columns: 1fr 400px;
-  gap: 3rem;
-  align-items: end; /* <<-- MUDE de 'start' para 'end' */
-  flex: 1;
-  padding-bottom: 6rem; /* <<-- ADICIONE esta linha (96px) */
-}
-
-.hero-info {
-  color: white;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.event-category {
-  display: inline-block;
-  background: rgba(255,255,255,0.2);
-  backdrop-filter: blur(10px);
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.9rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-  width: fit-content;
-}
-
-.event-title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 2rem 0;
-  line-height: 1.2;
-}
-
-.event-quick-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  font-size: 1.1rem;
-}
-
-.info-item svg {
-  width: 20px;
-  opacity: 0.8;
-}
-
-/* Hero Card - CORRIGIDO */
-.hero-card {
+.back-button:hover {
   background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-  height: fit-content;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.event-image-card {
+.event-banner {
+  position: relative;
   width: 100%;
-  height: 250px;
+  height: 400px;
   overflow: hidden;
 }
 
-.event-image-card img {
+.event-banner img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.card-actions {
-  padding: 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+.banner-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
 }
 
-.btn-favorite,
-.btn-share {
-  padding: 1rem;
-  border: 2px solid #e0e0e0;
-  background: white;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.3s;
-  font-size: 0.9rem;
-}
-
-.btn-favorite:hover {
-  border-color: #ff4757;
-  color: #ff4757;
-}
-
-.btn-favorite.is-favorite {
-  background: #ff4757;
-  border-color: #ff4757;
-  color: white;
-}
-
-.btn-share:hover {
-  border-color: #0066cc;
-  color: #0066cc;
-}
-
-/* Main Container - CORRIGIDO */
-.main-container {
+/* ========== CONTAINER ========== */
+.event-container {
   max-width: 1200px;
   margin: -80px auto 0;
-  padding: 0 2rem 4rem;
+  padding: 0 1.5rem;
   position: relative;
-  z-index: 3;
+  z-index: 5;
 }
 
-.content-grid {
+.event-layout {
   display: grid;
   grid-template-columns: 1fr 380px;
   gap: 2rem;
   align-items: start;
 }
 
-/* Main Column */
-.main-column {
+/* ========== MAIN COLUMN ========== */
+.event-main {
   display: flex;
   flex-direction: column;
   gap: 2rem;
 }
 
-.content-section {
+.event-intro {
   background: white;
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 2.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
-.section-title {
+.event-badge {
+  display: inline-block;
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.event-name {
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.2;
+}
+
+.event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #555;
+  font-size: 1rem;
+}
+
+.meta-icon {
+  color: #1976d2;
+  font-size: 1.25rem;
+}
+
+/* ========== SECTIONS ========== */
+.event-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.section-heading {
   font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a1a1a;
   margin: 0 0 1.5rem 0;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #1a1a1a;
 }
 
-.event-description {
-  line-height: 1.8;
+.section-content {
   color: #555;
   font-size: 1.05rem;
+  line-height: 1.8;
 }
 
-.location-info {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
+.location-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
 }
 
 .location-address {
-  font-size: 1.1rem;
-  color: #333;
-  line-height: 1.6;
+  color: #777;
+  margin: 0 0 1.5rem 0;
 }
 
-.map-placeholder {
+.map-container {
   background: #f5f5f5;
   border-radius: 8px;
   padding: 3rem;
@@ -667,26 +577,33 @@ const goBack = () => router.go(-1)
   color: #999;
 }
 
-/* Organizer Section - CORRIGIDO */
-.organizer-card {
+/* ========== ORGANIZER ========== */
+.organizer-box {
   display: flex;
-  gap: 1.5rem;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
   padding: 1.5rem;
   background: #f8f9fa;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s;
-  align-items: start;
 }
 
-.organizer-card:hover {
+.organizer-box:hover {
   background: #e9ecef;
-  transform: translateY(-2px);
 }
 
-.organizer-avatar {
-  width: 80px;
-  height: 80px;
+.organizer-left {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  flex: 1;
+}
+
+.organizer-photo {
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   overflow: hidden;
   background: white;
@@ -696,88 +613,73 @@ const goBack = () => router.go(-1)
   flex-shrink: 0;
 }
 
-.organizer-avatar img {
+.organizer-photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.organizer-avatar svg {
+.organizer-photo svg {
   font-size: 2rem;
-  color: #0066cc;
+  color: #1976d2;
 }
 
-.organizer-info {
-  flex: 1;
-}
-
-.organizer-info h3 {
-  margin: 0 0 0.5rem 0;
+.organizer-name {
+  font-size: 1.125rem;
+  font-weight: 600;
   color: #1a1a1a;
-  font-size: 1.2rem;
+  margin: 0 0 0.25rem 0;
 }
 
-.organizer-info p {
+.organizer-bio {
+  font-size: 0.9375rem;
   color: #666;
-  margin: 0 0 1rem 0;
-  line-height: 1.5;
+  margin: 0;
+  line-height: 1.4;
 }
 
-.organizer-actions {
+.organizer-right {
   display: flex;
   gap: 0.75rem;
-  flex-wrap: wrap;
 }
 
 .btn-follow,
-.btn-chat {
-  padding: 0.6rem 1.2rem;
+.btn-message {
+  padding: 0.65rem 1.25rem;
   border-radius: 8px;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   cursor: pointer;
+  transition: all 0.3s;
+  white-space: nowrap;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s;
 }
 
 .btn-follow {
   background: white;
-  border: 2px solid #0066cc;
-  color: #0066cc;
+  border: 2px solid #1976d2;
+  color: #1976d2;
 }
 
-.btn-follow:hover {
-  background: #0066cc;
+.btn-follow.following {
+  background: #1976d2;
   color: white;
 }
 
-.btn-follow.is-following {
-  background: #0066cc;
-  color: white;
-  border-color: #0066cc;
-}
-
-.btn-chat {
+.btn-message {
   background: #28a745;
   border: 2px solid #28a745;
   color: white;
 }
 
-.btn-chat:hover {
+.btn-message:hover {
   background: #218838;
-  border-color: #218838;
 }
 
-/* Sidebar - STICKY CORRIGIDO */
-.sidebar-column {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.sidebar-sticky {
+/* ========== SIDEBAR ========== */
+.event-sidebar {
   position: sticky;
   top: 2rem;
   display: flex;
@@ -785,151 +687,205 @@ const goBack = () => router.go(-1)
   gap: 1.5rem;
 }
 
-.info-card,
-.share-card {
+.sidebar-card {
   background: white;
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
-.info-card h3 {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.3rem;
-  color: #1a1a1a;
+.card-image {
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
 }
 
-.info-list {
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-body {
+  padding: 1.75rem;
+}
+
+.card-info-grid {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e0e0e0;
 }
 
-.info-row {
+.info-block {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  align-items: start;
   gap: 1rem;
 }
 
-.info-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #666;
-  font-weight: 500;
-  font-size: 0.95rem;
-  white-space: nowrap;
+.info-icon {
+  color: #1976d2;
+  font-size: 1.25rem;
+  margin-top: 0.125rem;
 }
 
-.info-label svg {
-  width: 16px;
-  color: #0066cc;
+.info-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.info-label {
+  font-size: 0.875rem;
+  color: #777;
+  font-weight: 500;
 }
 
 .info-value {
-  text-align: right;
-  font-weight: 600;
+  font-size: 0.9375rem;
   color: #1a1a1a;
-  font-size: 0.95rem;
-}
-
-.event-type-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
   font-weight: 600;
-  white-space: nowrap;
 }
 
-.event-type-badge.active {
+.event-status {
+  padding: 0.75rem;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.event-status.active {
   background: #d4edda;
   color: #155724;
 }
 
-.event-type-badge.inactive {
+.event-status.inactive {
   background: #f8d7da;
   color: #721c24;
 }
 
-.card-cta {
-  border-top: 1px solid #e9ecef;
-  padding-top: 1.5rem;
-}
-
-.btn-primary-large {
+.btn-interest {
   width: 100%;
-  padding: 1.25rem;
-  background: linear-gradient(135deg, #0066cc 0%, #004a99 100%);
+  padding: 1rem;
+  background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.1rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   cursor: pointer;
+  transition: all 0.3s;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  transition: all 0.3s;
   margin-bottom: 1rem;
 }
 
-.btn-primary-large:hover {
+.btn-interest:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(0,102,204,0.3);
+  box-shadow: 0 8px 20px rgba(25,118,210,0.3);
 }
 
-.cta-note {
-  text-align: center;
-  color: #666;
-  font-size: 0.85rem;
+.card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.action-btn {
+  padding: 0.75rem;
+  background: white;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  margin: 0;
+  transition: all 0.3s;
+  color: #555;
+}
+
+.action-btn:hover {
+  border-color: #1976d2;
+  color: #1976d2;
+}
+
+.action-btn.active {
+  background: #ff4757;
+  border-color: #ff4757;
+  color: white;
+}
+
+.card-note {
+  font-size: 0.8125rem;
+  color: #777;
+  text-align: center;
   line-height: 1.4;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
-/* Share Card */
-.share-card h4 {
+.social-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.75rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+.social-card h4 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #1a1a1a;
   margin: 0 0 1rem 0;
-  font-size: 1.1rem;
 }
 
-.social-share {
+.social-buttons {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.75rem;
 }
 
-.share-btn {
+.social-btn {
   aspect-ratio: 1;
   border: none;
   border-radius: 8px;
   color: white;
+  font-size: 1.5rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
   transition: all 0.3s;
 }
 
-.share-btn.whatsapp { background: #25D366; }
-.share-btn.facebook { background: #1877F2; }
-.share-btn.twitter { background: #1DA1F2; }
-.share-btn.link { background: #6c757d; }
+.social-btn.whatsapp { background: #25D366; }
+.social-btn.facebook { background: #1877F2; }
+.social-btn.twitter { background: #1DA1F2; }
+.social-btn.link { background: #6c757d; }
 
-.share-btn:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+.social-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-/* Loading */
-.loading-overlay {
+/* ========== LOADING ========== */
+.loading-screen {
   position: fixed;
   inset: 0;
   background: rgba(255,255,255,0.95);
@@ -944,7 +900,7 @@ const goBack = () => router.go(-1)
   width: 50px;
   height: 50px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #0066cc;
+  border-top: 4px solid #1976d2;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -955,65 +911,42 @@ const goBack = () => router.go(-1)
   100% { transform: rotate(360deg); }
 }
 
-/* Responsive - MELHORADO */
+/* ========== RESPONSIVE ========== */
 @media (max-width: 1024px) {
-  .hero-content {
-    grid-template-columns: 1fr;
-    gap: 2rem;
-  }
-
-  .hero-card {
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  .content-grid {
+  .event-layout {
     grid-template-columns: 1fr;
   }
 
-  .sidebar-sticky {
+  .event-sidebar {
     position: static;
   }
 }
 
 @media (max-width: 768px) {
-  .hero-container {
-    padding: 1.5rem;
-    min-height: 400px;
+  .event-banner {
+    height: 300px;
   }
 
-  .event-title {
-    font-size: 1.8rem;
+  .event-name {
+    font-size: 1.75rem;
   }
 
-  .hero-content {
-    gap: 1.5rem;
+  .event-intro,
+  .event-section {
+    padding: 1.75rem;
   }
 
-  .main-container {
-    margin-top: -40px;
-    padding: 0 1rem 2rem;
-  }
-
-  .content-section,
-  .info-card,
-  .share-card {
-    padding: 1.5rem;
-  }
-
-  .organizer-card {
+  .organizer-box {
     flex-direction: column;
-    text-align: center;
-    align-items: center;
+    align-items: start;
   }
 
-  .organizer-actions {
-    justify-content: center;
+  .organizer-right {
     width: 100%;
   }
 
   .btn-follow,
-  .btn-chat {
+  .btn-message {
     flex: 1;
   }
 
@@ -1021,32 +954,33 @@ const goBack = () => router.go(-1)
     grid-template-columns: 1fr;
   }
 
-  .info-row {
+  .event-meta {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .info-value {
-    text-align: left;
+    gap: 1rem;
   }
 }
 
 @media (max-width: 480px) {
-  .event-title {
+  .event-container {
+    padding: 0 1rem;
+  }
+
+  .event-name {
     font-size: 1.5rem;
   }
 
-  .info-item {
-    font-size: 1rem;
+  .event-intro,
+  .event-section {
+    padding: 1.25rem;
   }
 
-  .event-quick-info {
-    gap: 0.75rem;
+  .organizer-left {
+    flex-direction: column;
+    text-align: center;
   }
 
-  .section-title {
-    font-size: 1.25rem;
+  .social-buttons {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 </style>
